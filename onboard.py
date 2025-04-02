@@ -2,6 +2,7 @@
 import argparse
 import yaml
 
+import csv
 import json
 from jsonpath_ng import parse
 import requests
@@ -24,6 +25,7 @@ def main():
 
     url = args.api_jsonrpc
     token = args.token
+    inputFile = args.csv
 
 
     # pick up all host titles, load into memory
@@ -51,7 +53,7 @@ def main():
         "id": 1
     })
 
-    # pick up current LDAP settings
+    # observe existing host objects
     try:
         response = requests.request("POST", url, headers=headers, data=payload, verify=False)
 
@@ -62,12 +64,72 @@ def main():
     except Exception as e:
         print("Error occurred:", str(e))
 
+    # pick up CSV file
+    with open(inputFile, 'rt') as f:
+        # Convert to a list for immediate use
+        deviceList = list(csv.DictReader(f))
+
+    # go through CSV
+    for device in deviceList:
+        # print name
+        print(device['Host name'])
+        # host group not recognized yet
+        hostExist = 0
+        # go through existing
+        for existing in existingHostList:
+            if device['Host name'] == existing['host']:
+                # mask host group as found
+                hostExist = 1
+                print(device['Host name'] + ' exists')
+                break
+
+        if not hostExist:
+
+            payload = json.dumps({
+                "jsonrpc": "2.0",
+                "method": "host.create",
+                "params": {
+                    "host": device['Host name'],
+                    "interfaces": [
+                        {
+                            "type": 2,
+                            "main": 1,
+                            "useip": 1,
+                            "ip": "127.0.0.1",
+                            "dns": "",
+                            "port": "161",
+                            "details": {
+                                "version": "2",
+                                "bulk": "1",
+                                "community": "not.important.for.SNMP.traps"
+                            }
+                        }
+                    ],
+                    "groups": [
+                        {
+                            "groupid": "5"
+                        }
+                    ],
+                    "templates": [
+                        {
+                            "templateid": "10563"
+                        }
+                    ]
+                },
+                "id": 1
+            })
+
+            try:
+                response = requests.request("POST", url, headers=headers, data=payload, verify=False)
+
+                raw_text = response.text
+                print("Raw JSON response:", raw_text)
+                json_response = json.loads(raw_text)
+                #existingHostList = parse('$.result').find(json_response)[0].value
+            except Exception as e:
+                print("Error occurred:", str(e))
 
 
-
-
-    # importing CSV into memory
-#    file = open("devices.csv",'rt')
- #   reader = csv.DictReader( file )
 if __name__ == "__main__":
     main()
+
