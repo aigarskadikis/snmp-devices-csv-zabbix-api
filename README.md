@@ -11,7 +11,12 @@ NewHost2,10.15.16.17
 Zabbix server,88.88.88.88
 ```
 
-usage
+On Linux set script executable:
+```bash
+chmod +x onboard.py
+```
+
+Run on Linux:
 ```bash
 ./onboard.py \
 --api_jsonrpc https://127.0.0.1:44372/api_jsonrpc.php \
@@ -21,7 +26,7 @@ usage
 --defaultHostGroup 'Discovered hosts'
 ```
 
-or on windows
+Run on Windows:
 ```
 python3 onboard.py \
 --api_jsonrpc https://127.0.0.1:44372/api_jsonrpc.php \
