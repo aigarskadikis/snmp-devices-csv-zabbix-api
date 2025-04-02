@@ -1,5 +1,7 @@
-# snmp-devices-csv-zabbix-api
-Following project allows to onboard SNMPv2 devices in Zabbix 7.2 from CSV and automatically assign one host group and one template.
+# Register SNMP devices from CSV via Zabbix API
+The following project allows to onboard SNMP devices in Zabbix 7.2 from CSV.
+It allows to automatically assign one host group and one template.
+To not touch already registered objects, if "Host name" already exists, nothing will happen (no validation per host group and template)
 
 Input file must consist with 2 columns:
 ```csv
